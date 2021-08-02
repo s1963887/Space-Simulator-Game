@@ -20,8 +20,10 @@ var obstacleGroup, obstacle1, obstacle2, obstacle3, obstacle4, obstacle5, obstac
 
 function preload(){
 background_Image = loadImage("background_Space.jpg");
-rocket_Image = loadImage("rocket.png");
-
+rocket_Still = loadAnimation("spacecraft1.png");
+rocket_Move = loadAnimation("spacecraft2.png");
+rocket_Right = loadAnimation("spacecraft3.png");
+rocket_Left = loadAnimation("spacecraft4.png");
 obstacle1 = loadImage("1.png")
 obstacle2 = loadImage("2.png")
 obstacle3 = loadImage("3.png")
@@ -34,9 +36,13 @@ obstacle7 = loadImage("7.png")
 
 function setup() {
   createCanvas(displayWidth, displayHeight-111);
-  rocket = createSprite(100,100,30,30);
+  rocket = createSprite(displayWidth/2,displayHeight/2,30,30);
   rocket.shapeColor = "grey";
-  rocket.addImage(rocket_Image);
+  rocket.addAnimation("still", rocket_Still);
+  rocket.addAnimation("move", rocket_Move);
+  rocket.addAnimation("right", rocket_Right);
+  rocket.addAnimation("left", rocket_Left);
+  rocket.scale = 0.4
 
   sky = createSprite(1100,500,displayWidth,displayHeight);
   sky.addImage(background_Image);
@@ -74,8 +80,16 @@ if(gameState === 0){
   textSize(100);
   textFont('Architects Daughter');
   fill("pink");
-  text('Daniel', 100, 200);
+  text('Asterioid Escape', 700 , 200);
 
+  strokeWeight(5);
+  stroke("white");
+  textSize(20);
+  textFont('Verdana');
+  fill("black")
+  text('Instructions: 1. Use the arrow keys to initiate speed change on all axis', 700, 300)
+  text('2. Press "Space" to stop and start engine ', 700, 400)
+  text('3. Pass 10 obstacles without coliding to reach the next level', 700, 500)
   sky.visible = false;
   rocket.visible = false;
  
@@ -103,27 +117,50 @@ if(gameState === 1){
   textSize(50);
   text("Score: " + score, 100, 300)
 
+  
+
   if(sky.y > displayHeight){
-    sky.y = 200;
+    sky.y = displayHeight/2;
+
   }
-  sky.velocityY = 1;
+  if(sky.y < 0){
+    sky.y = displayHeight/2;
+  }
+  if(sky.x > displayWidth){
+    sky.x = displayWidth/2;
+    
+  }
+  if(sky.x < 0){
+    sky.x = displayWidth/2;
+    
+  }
+  
   if (keyDown (UP_ARROW)){
-    rocket.y -= 10;
+    sky.velocityY += 0.1;
+    rocket.changeAnimation("move", rocket_Move);
+    //obstacleGroup.setVelocityYEach(sky.velocityY);
   }
+ 
   if (keyDown (DOWN_ARROW)){
-      rocket.y += 10;
+    sky.velocityY -= 0.1;
+    rocket.changeAnimation("still", rocket_Still);
+    //obstacleGroup.setVelocityYEach(sky.velocityY);
   }
   if (keyDown (RIGHT_ARROW)){
-    translate(200, 200);
-    rotate(angle);
+        sky.velocityX -= 0.1;
+        rocket.changeAnimation("right", rocket_Right);
+        //obstacleGroup.setVelocityXEach(sky.velocityX);
   }
   if (keyDown (LEFT_ARROW)){
-          rocket.x -= 10;
+      sky.velocityX += 0.1;
+      rocket.changeAnimation("left", rocket_Left);
+      //obstacleGroup.setVelocityXEach(sky.velocityX);
   }
   rocket.depth = rocket.depth + 1;
   
   createAsteroid();
 }
+
 /*
 if(gameState === 2){
   sky.velocityY = 2;
@@ -189,7 +226,7 @@ drawSprites();
 function createAsteroid(){
   if(frameCount % 60 === 0){
     obstacle = createSprite(300, -50);
-    obstacle.velocityY = 5;
+    obstacle.veloctiyY = 15;
     obstacle.x = Math.round(random(60, 1900))
 
     var rand = Math.round(random(1,6));
